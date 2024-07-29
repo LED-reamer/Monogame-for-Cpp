@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <chrono>
+#include <memory>
 
 namespace g
 {
@@ -22,8 +23,6 @@ namespace g
 		Animation();
 		Animation(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr = nullptr);
 		Animation(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation& _followingAnimation, SpriteSheet* spriteSheetPtr = nullptr);
-		//static Animation createNewLoop(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr = nullptr);
-		//static Animation createNewOnce(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation _followingAnimation, SpriteSheet* spriteSheetPtr = nullptr);
 
 		//if nulled AnimatedSprite will use texture of the sf::Sprite
 		SpriteSheet* spriteSheet;
@@ -32,7 +31,7 @@ namespace g
 		unsigned int numFrames;
 		float secondsPerFrame;
 		unsigned int currentFrame = 0;
-		std::chrono::steady_clock::time_point timerAnimationStart;
+		std::chrono::system_clock::time_point timerAnimationStart;
 		std::shared_ptr<g::Animation> followingAnimation;
 		bool looping = true;
 	};

@@ -73,7 +73,8 @@ void g::AnimatedSprite::setAnimation(Animation& animation)
 	}
 
 	currentAnimation = animation;
-	currentAnimation.timerAnimationStart = std::chrono::high_resolution_clock::now();
+	currentAnimation.timerAnimationStart = std::chrono::system_clock::now();
+	
 }
 
 void g::AnimatedSprite::updateAnimation()
@@ -92,7 +93,7 @@ void g::AnimatedSprite::updateAnimation()
 	else return;
 
 	//get time since last animation reset
-	std::chrono::steady_clock::time_point timerNow = std::chrono::high_resolution_clock::now();
+	std::chrono::system_clock::time_point timerNow = std::chrono::system_clock::now();
 	float duration = std::chrono::duration_cast<std::chrono::milliseconds>(timerNow - currentAnimation.timerAnimationStart).count() / 1000.0f; //convert to seconds float
 
 	//if animation is done reset timer
@@ -103,7 +104,7 @@ void g::AnimatedSprite::updateAnimation()
 			currentAnimation = *currentAnimation.followingAnimation.get();
 
 		duration = 0.0f;
-		currentAnimation.timerAnimationStart = std::chrono::high_resolution_clock::now();
+		currentAnimation.timerAnimationStart = std::chrono::system_clock::now();
 	}
 
 	//set current frame
