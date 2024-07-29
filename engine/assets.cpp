@@ -62,7 +62,7 @@ void g::AssetManager::loadFile(Asset& asset, const char* filename)
 		}
 	
 	
-		asset.data = (char*)malloc(file_info.size);
+		asset.data = (char*)malloc(sizeof(char) * file_info.size);
 		if (asset.data == nullptr)
 		{
 			zip_fclose(file);
@@ -82,7 +82,7 @@ void g::AssetManager::loadFile(Asset& asset, const char* filename)
 		std::streamsize size = file.tellg();
 		file.seekg(0, std::ios::beg);
 
-		asset.data = (void*)malloc(sizeof(char) * size);
+		asset.data = (char*)malloc(sizeof(char) * size);
 		asset.size = size;
 		if (file.read((char*)asset.data, size))
 		{

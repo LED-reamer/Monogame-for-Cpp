@@ -20,8 +20,10 @@ namespace g
 	{
 	public:
 		Animation();
-		static Animation createNewLoop(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr = nullptr);
-		static Animation createNewOnce(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation _followingAnimation, SpriteSheet* spriteSheetPtr = nullptr);
+		Animation(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr = nullptr);
+		Animation(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation& _followingAnimation, SpriteSheet* spriteSheetPtr = nullptr);
+		//static Animation createNewLoop(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr = nullptr);
+		//static Animation createNewOnce(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation _followingAnimation, SpriteSheet* spriteSheetPtr = nullptr);
 
 		//if nulled AnimatedSprite will use texture of the sf::Sprite
 		SpriteSheet* spriteSheet;
@@ -43,20 +45,27 @@ namespace g
 		bool flipVertically = false;
 		bool flipHorizontally = false;
 
-		//set rows and cols if sf::Sprite texture is used
 		AnimatedSprite();
-		static AnimatedSprite createAnimatedSprite(sf::Sprite sprite, int rows = -1, int cols = -1);
-		static AnimatedSprite createAnimatedSprite(sf::Texture texture, int rows = -1, int cols = -1);
-		void setAnimation(Animation animation);
+		AnimatedSprite(sf::Sprite& sprite, int numRows, int numCols);
+		AnimatedSprite(sf::Texture& texture, int numRows, int numCols);
+		//set rows and cols if sf::Sprite texture is used
+		//static AnimatedSprite createAnimatedSprite(sf::Sprite& sprite, int numRows, int numCols);
+		//set rows and cols if sf::Sprite texture is used
+		//static AnimatedSprite createAnimatedSprite(sf::Texture& texture, int numRows, int numCols);
+		void setAnimation(Animation& animation);
 		void updateAnimation();
 	private:
 		bool m_useSpriteTexture = false;
-		unsigned int m_rows;
-		unsigned int m_cols;
+		unsigned int m_numRows;
+		unsigned int m_numCols;
 	};
 
 	namespace easing
 	{
+
+#define EASE_PI 3.14159265358979323846
+#define EASE_PI2 1.57079632679489661923
+
 		// Linear interpolation (no easing)
 		float linearInterpolation(float p);
 

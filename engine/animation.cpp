@@ -1,6 +1,7 @@
 #include "animation.h"
 
 #include <math.h>
+#include <iostream>
 
 g::SpriteSheet::SpriteSheet(sf::Texture spriteSheetTexture, unsigned int _rows, unsigned int _cols)
 {
@@ -20,62 +21,47 @@ g::Animation::Animation()
 	looping = true;
 }
 
-g::Animation g::Animation::createNewLoop(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr)
+g::Animation::Animation(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, SpriteSheet* spriteSheetPtr)
 {
-	g::Animation anim;
-	anim.spriteSheet = spriteSheetPtr;
+	spriteSheet = spriteSheetPtr;
 
-	anim.row = _row;
-	anim.numFrames = _numFrames;
-	anim.secondsPerFrame = _secondsPerFrame;
-	anim.looping = true;
-
-	return anim;
+	row = _row;
+	numFrames = _numFrames;
+	secondsPerFrame = _secondsPerFrame;
+	looping = true;
 }
 
-g::Animation g::Animation::createNewOnce(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation _followingAnimation, SpriteSheet* spriteSheetPtr)
+g::Animation::Animation(unsigned int _row, unsigned int _numFrames, float _secondsPerFrame, g::Animation& _followingAnimation, SpriteSheet* spriteSheetPtr)
 {
-	g::Animation anim;
-	anim.spriteSheet = spriteSheetPtr;
+	spriteSheet = spriteSheetPtr;
 
-	anim.row = _row;
-	anim.numFrames = _numFrames;
-	anim.secondsPerFrame = _secondsPerFrame;
-	anim.looping = false;
-	anim.followingAnimation = std::make_shared<g::Animation>(_followingAnimation);
-
-	return anim;
+	row = _row;
+	numFrames = _numFrames;
+	secondsPerFrame = _secondsPerFrame;
+	looping = false;
+	followingAnimation = std::make_shared<g::Animation>(_followingAnimation);
 }
-
 
 g::AnimatedSprite::AnimatedSprite()
 {
 
 }
 
-g::AnimatedSprite g::AnimatedSprite::createAnimatedSprite(sf::Sprite sprite, int rows, int cols)
+g::AnimatedSprite::AnimatedSprite(sf::Sprite& sprite, int numRows, int numCols)
 {
-	g::AnimatedSprite returnSprite;
-
-	returnSprite.sprite = sprite;
-	returnSprite.m_rows = rows;
-	returnSprite.m_cols = cols;
-
-	return returnSprite;
+	sprite = sprite;
+	m_numRows = numRows;
+	m_numCols = numCols;
 }
 
-g::AnimatedSprite g::AnimatedSprite::createAnimatedSprite(sf::Texture texture, int rows, int cols)
+g::AnimatedSprite::AnimatedSprite(sf::Texture& texture, int numRows, int numCols)
 {
-	g::AnimatedSprite returnSprite;
-
-	returnSprite.sprite = sf::Sprite(texture);
-	returnSprite.m_rows = rows;
-	returnSprite.m_cols = cols;
-
-	return returnSprite;
+	sprite = sf::Sprite(texture);
+	m_numRows = numRows;
+	m_numCols = numCols;
 }
 
-void g::AnimatedSprite::setAnimation(Animation animation)
+void g::AnimatedSprite::setAnimation(Animation& animation)
 {
 	if (animation.spriteSheet == nullptr)
 	{
@@ -92,8 +78,18 @@ void g::AnimatedSprite::setAnimation(Animation animation)
 
 void g::AnimatedSprite::updateAnimation()
 {
-	unsigned int frameWidth  = m_useSpriteTexture ? sprite.getTexture()->getSize().x / m_cols : currentAnimation.spriteSheet->texture.getSize().x / currentAnimation.spriteSheet->cols;
-	unsigned int frameHeight = m_useSpriteTexture ? sprite.getTexture()->getSize().y / m_rows : currentAnimation.spriteSheet->texture.getSize().y / currentAnimation.spriteSheet->rows;
+	unsigned int frameWidth, frameHeight;
+	if (m_useSpriteTexture)
+	{
+		frameWidth = sprite.getTexture()->getSize().x / m_numCols;
+		frameHeight = sprite.getTexture()->getSize().y / m_numRows;
+	}
+	else if (currentAnimation.spriteSheet != nullptr)
+	{
+		frameWidth = currentAnimation.spriteSheet->texture.getSize().x / currentAnimation.spriteSheet->cols;
+		frameHeight = currentAnimation.spriteSheet->texture.getSize().y / currentAnimation.spriteSheet->rows;
+	}
+	else return;
 
 	//get time since last animation reset
 	std::chrono::steady_clock::time_point timerNow = std::chrono::high_resolution_clock::now();
@@ -111,7 +107,9 @@ void g::AnimatedSprite::updateAnimation()
 	}
 
 	//set current frame
-	float percentage = duration / fullAnimationTime;
+	float percentage = 0.0f;
+	if(fullAnimationTime != 0)
+		percentage = duration / fullAnimationTime;
 
 	if (duration != 0.0f)
 		currentAnimation.currentFrame = (unsigned int)(percentage * currentAnimation.numFrames);
@@ -123,12 +121,14 @@ void g::AnimatedSprite::updateAnimation()
 		currentAnimation.currentFrame = 0;
 
 	//set animation
-	sprite.setTextureRect(sf::IntRect(currentAnimation.currentFrame * frameWidth + (flipVertically ? frameWidth : 0), currentAnimation.row * frameHeight + (flipHorizontally ? frameHeight : 0), flipVertically ? -(int)frameWidth : frameWidth, flipHorizontally ? -(int)frameHeight : frameHeight));
+	sprite.setTextureRect(
+		sf::IntRect(
+			currentAnimation.currentFrame * frameWidth + (flipVertically ? frameWidth : 0), 
+			currentAnimation.row * frameHeight + (flipHorizontally ? frameHeight : 0), 
+			flipVertically ? -(int)frameWidth : frameWidth, 
+			flipHorizontally ? -(int)frameHeight : frameHeight)
+	);
 }
-
-
-#define EASE_PI 3.14159265358979323846
-#define EASE_PI2 1.57079632679489661923
 
 float g::easing::linearInterpolation(float p)
 {
